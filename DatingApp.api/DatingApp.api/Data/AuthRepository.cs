@@ -21,18 +21,18 @@ namespace DatingApp.api.Data
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Username == username);
             if (user == null)
                 return null;
-            if (!VrifyPasswordHash(password, user.PasswoadHash, user.PasswordSalt))
+            if (!VrifyPasswordHash(password, user.PasswordHash, user.PasswordSalt))
                 return null;
             return user;
         }
-        private bool VrifyPasswordHash(string password, byte[] passwoadHash, byte[] passwordSalt)
+        private bool VrifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
         {
             using (var hmac = new System.Security.Cryptography.HMACSHA512(passwordSalt))
             {
                 var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
                 for (int i= 0; i<computedHash.Length; i++)
                 {
-                    if (computedHash[i] != passwoadHash[i]) return false;
+                    if (computedHash[i] != passwordHash[i]) return false;
                 }
                 return true;
             }
@@ -42,17 +42,17 @@ namespace DatingApp.api.Data
             byte[] passwordHash, passwordSalt;
             CreatePasswordHash(password, out passwordHash, out passwordSalt);
 
-            user.PasswoadHash = passwordHash;
+            user.PasswordHash = passwordHash;
             user.PasswordSalt = passwordSalt;
 
             await _context.Users.AddAsync(user);
-            await _context.SaveChangeAsync();
+            await _context.SaveChangesAsync();
             return user;
         }
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
-            using (var hmac = new System.Security.Cryptography.HMACSHA512())
+            using (var hmac = new System.Security.Cryptography.HMACSHA512()) 
             {
                 passwordSalt = hmac.Key;
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
@@ -65,6 +65,9 @@ namespace DatingApp.api.Data
             return false;
         }
 
-      
+        public string GetValues()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
